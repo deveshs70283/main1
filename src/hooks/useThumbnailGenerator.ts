@@ -26,13 +26,11 @@ export function useThumbnailGenerator() {
     
     setLoading(true);
     try {
-      // First try to deduct credits
       const deductionSuccessful = await deductCredits(user.uid);
       if (!deductionSuccessful) {
         throw new Error('Insufficient credits');
       }
 
-      // If deduction successful, generate thumbnail
       const data = await generateThumbnail(activeTab, input, user.uid, userEmail);
       setResult(data);
     } catch (error) {
@@ -51,6 +49,7 @@ export function useThumbnailGenerator() {
     input,
     loading,
     result,
+    setResult,
     handleTabChange,
     handleInputChange,
     handleGenerate,

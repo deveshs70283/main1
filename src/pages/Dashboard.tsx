@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Background } from '../components/Background';
 import { Header } from '../components/Header';
 import { Sidebar } from '../components/Sidebar';
@@ -20,13 +20,21 @@ export function Dashboard() {
     result,
     handleTabChange,
     handleInputChange,
-    handleGenerate
+    handleGenerate,
+    setResult
   } = useThumbnailGenerator();
 
   const onGenerate = () => {
     if (user?.email) {
       handleGenerate(user.email);
     }
+  };
+
+  const handleFaceSwapSuccess = (swappedImageUrl: string) => {
+    setResult({
+      status: 'success',
+      imageUrl: swappedImageUrl
+    });
   };
 
   return (
@@ -48,6 +56,7 @@ export function Dashboard() {
                   value={input} 
                   onChange={handleInputChange}
                   onSubmit={onGenerate}
+                  onFaceSwapSuccess={handleFaceSwapSuccess}
                   disabled={loading}
                   credits={credits}
                 />

@@ -1,5 +1,7 @@
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../lib/firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import { storage, db } from '../lib/firebase';
+import { auth } from '../lib/firebase';
 
 const FACE_SWAP_WEBHOOK = 'https://hook.eu2.make.com/u8x8dlhdbakj53idx7h4o8y4itm11zyn';
 
@@ -10,7 +12,18 @@ export async function uploadFaceImage(file: File): Promise<string> {
   return getDownloadURL(storageRef);
 }
 
-export async function performFaceSwap(thumbnailUrl: string, faceImageUrl: string): Promise<string> {
+async function uploadSwappedImage(imageUrl: string): Promise<string> {
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+  
+  const fileName = `swapped-faces/${Date.now()}.jpg`;
+  const storageRef = ref(storage, fileName);
+  await uploadBytes(storageRef, blob);
+  
+  return getDownloadURL(storageRef);
+}
+
+export async function performFaceSwap(targetImageUrl: string, faceImageUrl: string): Promise<string> {
   try {
     const response = await fetch(FACE_SWAP_WEBHOOK, {
       method: 'POST',
@@ -18,7 +31,7 @@ export async function performFaceSwap(thumbnailUrl: string, faceImageUrl: string
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        thumbnail_url: thumbnailUrl,
+        thumbnail_url: targetImageUrl,
         face_image_url: faceImageUrl,
       }),
     });
@@ -28,24 +41,33 @@ export async function performFaceSwap(thumbnailUrl: string, faceImageUrl: string
     }
 
     const text = await response.text();
-    
-    // If response is a direct URL
-    if (text.trim().startsWith('http')) {
-      return text.trim();
-    }
+    let resultUrl: string;
 
-    // Try parsing as JSON
     try {
       const data = JSON.parse(text);
-      if (Array.isArray(data) && data[0]?.body) {
-        if (typeof data[0].body === 'string' && data[0].body.startsWith('http')) {
-          return data[0].body;
-        }
-      }
-      throw new Error('Invalid response format');
-    } catch (e) {
-      throw new Error('Failed to parse face swap response');
+      resultUrl = Array.isArray(data) ? data[0]?.body : data;
+    } catch {
+      resultUrl = text.trim();
     }
+
+    if (!resultUrl || !resultUrl.startsWith('http')) {
+      throw new Error('Invalid response format');
+    }
+
+    const storedImageUrl = await uploadSwappedImage(resultUrl);
+
+    const user = auth.currentUser;
+    if (user) {
+      await addDoc(collection(db, 'faceswaps'), {
+        userId: user.uid,
+        faceImageUrl,
+        targetImageUrl,
+        resultUrl: storedImageUrl,
+        createdAt: Date.now()
+      });
+    }
+
+    return storedImageUrl;
   } catch (error) {
     console.error('Face swap error:', error);
     throw new Error(error instanceof Error ? error.message : 'Face swap failed');

@@ -6,6 +6,7 @@ import { SignIn } from './pages/auth/SignIn';
 import { SignUp } from './pages/auth/SignUp';
 import { Dashboard } from './pages/Dashboard';
 import { MyThumbnails } from './pages/MyThumbnails';
+import { MyFaceSwaps } from './pages/MyFaceSwaps';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AuthRedirectHandler } from './components/auth/AuthRedirectHandler';
 
@@ -39,6 +40,14 @@ export function App() {
           element={
             <ProtectedRoute>
               <MyThumbnails />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/my-face-swaps" 
+          element={
+            <ProtectedRoute>
+              <MyFaceSwaps />
             </ProtectedRoute>
           } 
         />

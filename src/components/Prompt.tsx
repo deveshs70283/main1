@@ -1,17 +1,19 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
 import type { GenerationType } from '../types';
+import { FaceSwapUpload } from './FaceSwapUpload';
 
 interface PromptProps {
   type: GenerationType;
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
+  onFaceSwapSuccess?: (url: string) => void;
   disabled?: boolean;
   credits: number;
 }
 
-export function Prompt({ type, value, onChange, onSubmit, disabled, credits }: PromptProps) {
+export function Prompt({ type, value, onChange, onSubmit, onFaceSwapSuccess, disabled, credits }: PromptProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit();
@@ -26,15 +28,13 @@ export function Prompt({ type, value, onChange, onSubmit, disabled, credits }: P
       case 'youtube':
         return "Enter a YouTube video URL (e.g., https://youtube.com/watch?v=...)";
       default:
-        return "Coming soon...";
+        return "";
     }
   };
 
   if (type === 'faceswap') {
     return (
-      <div className="flex items-center justify-center h-32 text-zinc-500">
-        FaceSwap feature coming soon...
-      </div>
+      <FaceSwapUpload onSuccess={url => onFaceSwapSuccess?.(url)} />
     );
   }
 

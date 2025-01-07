@@ -1,10 +1,47 @@
 import React from 'react';
-import { Home, Image, LogOut } from 'lucide-react';
+import { Home, Image, UserRound, LogOut } from 'lucide-react';
 import { Logo } from './Logo';
 import { auth } from '../lib/firebase';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuthState } from '../hooks/useAuthState';
 import { useCredits } from '../hooks/useCredits';
+
+interface NavItemProps {
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+  to?: string;
+}
+
+function NavItem({ icon, label, active, onClick, to }: NavItemProps) {
+  const content = (
+    <>
+      {icon}
+      <span className="text-sm font-medium">{label}</span>
+    </>
+  );
+
+  const className = `w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+    active 
+      ? 'bg-emerald-500/10 text-emerald-500' 
+      : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+  }`;
+
+  if (to) {
+    return (
+      <Link to={to} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button onClick={onClick} className={className}>
+      {content}
+    </button>
+  );
+}
 
 export function Sidebar() {
   const navigate = useNavigate();
@@ -62,6 +99,12 @@ export function Sidebar() {
             to="/my-thumbnails"
             active={location.pathname === '/my-thumbnails'}
           />
+          <NavItem 
+            icon={<UserRound className="w-5 h-5" />} 
+            label="My Face Swaps" 
+            to="/my-face-swaps"
+            active={location.pathname === '/my-face-swaps'}
+          />
         </div>
       </nav>
       
@@ -73,42 +116,5 @@ export function Sidebar() {
         />
       </div>
     </div>
-  );
-}
-
-interface NavItemProps {
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-  onClick?: () => void;
-  to?: string;
-}
-
-function NavItem({ icon, label, active, onClick, to }: NavItemProps) {
-  const content = (
-    <>
-      {icon}
-      <span className="text-sm font-medium">{label}</span>
-    </>
-  );
-
-  const className = `w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-    active 
-      ? 'bg-emerald-500/10 text-emerald-500' 
-      : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
-  }`;
-
-  if (to) {
-    return (
-      <Link to={to} className={className}>
-        {content}
-      </Link>
-    );
-  }
-
-  return (
-    <button onClick={onClick} className={className}>
-      {content}
-    </button>
   );
 }
