@@ -3,12 +3,19 @@ import { Layout } from '../components/Layout';
 import { useAuthState } from '../hooks/useAuthState';
 import { useThumbnails } from '../hooks/useThumbnails';
 import { ThumbnailPreview } from '../components/ThumbnailPreview';
+import { updateThumbnailImage } from '../services/thumbnailService';
 import type { Thumbnail } from '../types/thumbnail';
 
 export function MyThumbnails() {
   const { user, loading: authLoading } = useAuthState();
   const { thumbnails, loading, error } = useThumbnails(user?.uid);
   const [selectedThumbnail, setSelectedThumbnail] = useState<Thumbnail | null>(null);
+
+  const handleThumbnailUpdate = async (id: string, newImageUrl: string) => {
+    if (user?.uid) {
+      await updateThumbnailImage(id, newImageUrl);
+    }
+  };
 
   if (authLoading || loading) {
     return (
@@ -54,6 +61,7 @@ export function MyThumbnails() {
         <ThumbnailPreview
           thumbnail={selectedThumbnail}
           onClose={() => setSelectedThumbnail(null)}
+          onUpdate={handleThumbnailUpdate}
         />
       )}
     </Layout>

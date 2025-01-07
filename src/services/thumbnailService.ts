@@ -2,7 +2,7 @@ import { generateFromPrompt, generateFromYoutube } from './api';
 import { extractYouTubeId, getYouTubeThumbnailUrl } from '../utils/youtube';
 import { validatePrompt, validateUrl } from '../utils/validation';
 import { db, storage } from '../lib/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { GenerationType, ThumbnailResponse } from '../types';
 
@@ -13,6 +13,14 @@ async function uploadThumbnail(imageUrl: string, userEmail: string): Promise<str
   const storageRef = ref(storage, fileName);
   await uploadBytes(storageRef, blob);
   return getDownloadURL(storageRef);
+}
+
+export async function updateThumbnailImage(thumbnailId: string, swappedImageUrl: string): Promise<void> {
+  const thumbnailRef = doc(db, 'thumbnails', thumbnailId);
+  await updateDoc(thumbnailRef, {
+    swappedImageUrl,
+    hasSwappedVersion: true
+  });
 }
 
 export async function generateThumbnail(
@@ -43,9 +51,11 @@ export async function generateThumbnail(
       // Upload to Firebase Storage
       const storedImageUrl = await uploadThumbnail(response.imageUrl, userEmail);
       
-      // Save metadata to Firestore
+      // Save metadata to Firestore with new fields
       await addDoc(collection(db, 'thumbnails'), {
         imageUrl: storedImageUrl,
+        swappedImageUrl: null,
+        hasSwappedVersion: false,
         prompt: input,
         createdAt: Date.now(),
         userId,
