@@ -1,43 +1,74 @@
 import React, { useState } from 'react';
-import { X, Download, Wand2, ArrowLeft } from 'lucide-react';
+import { X, Download, Wand2, ArrowLeft, Edit3 } from 'lucide-react';
 import type { Thumbnail } from '../types/thumbnail';
 import { FaceSwapModal } from './FaceSwapModal';
+import { InpaintingModal } from './InpaintingModal';
 
 interface ThumbnailPreviewProps {
   thumbnail: Thumbnail;
   onClose: () => void;
-  onUpdate?: (id: string, newImageUrl: string) => void;
+  onUpdate?: (id: string, newImageUrl: string, category: 'face-swapped' | 'inpainted') => void;
 }
 
 export function ThumbnailPreview({ thumbnail, onClose, onUpdate }: ThumbnailPreviewProps) {
   const [showFaceSwap, setShowFaceSwap] = useState(false);
+  const [showInpainting, setShowInpainting] = useState(false);
   const [showingSwapped, setShowingSwapped] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const currentImageUrl = showingSwapped && thumbnail.swappedImageUrl 
     ? thumbnail.swappedImageUrl 
     : thumbnail.imageUrl;
 
   const handleDownload = async () => {
-    try {
-      const response = await fetch(currentImageUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `thumbnail-${thumbnail.id}${showingSwapped ? '-swapped' : ''}.png`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error downloading thumbnail:', error);
+  try {
+    setDownloadError(null);
+
+    if (!currentImageUrl) {
+      throw new Error('No image URL available');
     }
-  };
+
+    const response = await fetch(currentImageUrl);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.statusText}`);
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.startsWith('image/')) {
+      throw new Error('Invalid image format');
+    }
+
+    const blob = await response.blob();
+    if (blob.size === 0) {
+      throw new Error('Empty image file');
+    }
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `thumbnail-${thumbnail.id}${showingSwapped ? '-swapped' : ''}.${contentType.split('/')[1] || 'png'}`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error) {
+    console.error('Error downloading thumbnail:', error);
+    setDownloadError(error instanceof Error ? error.message : 'Failed to download image');
+  }
+};
+
+
 
   const handleFaceSwapSuccess = (newImageUrl: string) => {
-    onUpdate?.(thumbnail.id, newImageUrl);
+    onUpdate?.(thumbnail.id, newImageUrl, 'face-swapped');
     setShowingSwapped(true);
     setShowFaceSwap(false);
+  };
+
+  const handleInpaintingSuccess = (newImageUrl: string) => {
+    onUpdate?.(thumbnail.id, newImageUrl, 'inpainted');
+    setShowInpainting(false);
   };
 
   return (
@@ -86,6 +117,12 @@ export function ThumbnailPreview({ thumbnail, onClose, onUpdate }: ThumbnailPrev
             </p>
           )}
 
+          {downloadError && (
+            <p className="text-red-400 text-sm bg-red-400/10 p-2 rounded">
+              {downloadError}
+            </p>
+          )}
+
           <div className="flex items-center gap-3">
             <button
               onClick={handleDownload}
@@ -96,13 +133,23 @@ export function ThumbnailPreview({ thumbnail, onClose, onUpdate }: ThumbnailPrev
             </button>
 
             {!showingSwapped && (
-              <button
-                onClick={() => setShowFaceSwap(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors"
-              >
-                <Wand2 className="w-4 h-4" />
-                Swap Face
-              </button>
+              <>
+                <button
+                  onClick={() => setShowFaceSwap(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors"
+                >
+                  <Wand2 className="w-4 h-4" />
+                  Swap Face
+                </button>
+
+                <button
+                  onClick={() => setShowInpainting(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  Add/Remove Object
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -113,6 +160,13 @@ export function ThumbnailPreview({ thumbnail, onClose, onUpdate }: ThumbnailPrev
         onClose={() => setShowFaceSwap(false)}
         thumbnailUrl={thumbnail.imageUrl}
         onSuccess={handleFaceSwapSuccess}
+      />
+
+      <InpaintingModal
+        isOpen={showInpainting}
+        onClose={() => setShowInpainting(false)}
+        imageUrl={currentImageUrl}
+        onSuccess={handleInpaintingSuccess}
       />
     </div>
   );

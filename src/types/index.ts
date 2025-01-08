@@ -1,20 +1,12 @@
 export type GenerationType = 'thumbnail' | 'youtube' | 'faceswap';
+export type ThumbnailCategory = 'original' | 'face-swapped' | 'inpainted' | 'mask';
 
-export interface ThumbnailRequest {
-  prompt: string;
-  referenceUrl?: string;
+export interface ThumbnailFilters {
+  category?: ThumbnailCategory;
+  startDate?: Date;
+  endDate?: Date;
+  sortBy: 'date' | 'category';
+  sortOrder: 'asc' | 'desc';
 }
 
-export interface ThumbnailResponse {
-  imageUrl: string;
-  status: 'success' | 'error';
-  message?: string;
-}
-
-export interface MakeResponseItem {
-  body: string[];
-  status: number;
-  headers: any[];
-}
-
-export type MakeResponse = MakeResponseItem[];
+// ... rest of the existing types ...

@@ -2,7 +2,7 @@ import { generateFromPrompt, generateFromYoutube } from './api';
 import { extractYouTubeId, getYouTubeThumbnailUrl } from '../utils/youtube';
 import { validatePrompt, validateUrl } from '../utils/validation';
 import { db, storage } from '../lib/firebase';
-import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { GenerationType, ThumbnailResponse } from '../types';
 
@@ -15,12 +15,26 @@ async function uploadThumbnail(imageUrl: string, userEmail: string): Promise<str
   return getDownloadURL(storageRef);
 }
 
-export async function updateThumbnailImage(thumbnailId: string, swappedImageUrl: string): Promise<void> {
+export async function updateThumbnailImage(thumbnailId: string, newImageUrl: string, category: 'face-swapped' | 'inpainted'): Promise<void> {
   const thumbnailRef = doc(db, 'thumbnails', thumbnailId);
-  await updateDoc(thumbnailRef, {
-    swappedImageUrl,
-    hasSwappedVersion: true
-  });
+  
+  const updates: Record<string, any> = {
+    category,
+  };
+
+  if (category === 'face-swapped') {
+    updates.swappedImageUrl = newImageUrl;
+    updates.hasSwappedVersion = true;
+  } else if (category === 'inpainted') {
+    updates.inpaintedImageUrl = newImageUrl;
+    updates.hasInpaintedVersion = true;
+  }
+
+  await updateDoc(thumbnailRef, updates);
+}
+
+export async function deleteThumbnail(thumbnailId: string): Promise<void> {
+  await deleteDoc(doc(db, 'thumbnails', thumbnailId));
 }
 
 export async function generateThumbnail(
@@ -48,14 +62,15 @@ export async function generateThumbnail(
     }
 
     if (response.status === 'success') {
-      // Upload to Firebase Storage
       const storedImageUrl = await uploadThumbnail(response.imageUrl, userEmail);
       
-      // Save metadata to Firestore with new fields
       await addDoc(collection(db, 'thumbnails'), {
         imageUrl: storedImageUrl,
         swappedImageUrl: null,
+        inpaintedImageUrl: null,
         hasSwappedVersion: false,
+        hasInpaintedVersion: false,
+        category: 'original',
         prompt: input,
         createdAt: Date.now(),
         userId,

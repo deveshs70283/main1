@@ -11,9 +11,9 @@ export function MyThumbnails() {
   const { thumbnails, loading, error } = useThumbnails(user?.uid);
   const [selectedThumbnail, setSelectedThumbnail] = useState<Thumbnail | null>(null);
 
-  const handleThumbnailUpdate = async (id: string, newImageUrl: string) => {
+  const handleThumbnailUpdate = async (id: string, newImageUrl: string, category: 'face-swapped' | 'inpainted') => {
     if (user?.uid) {
-      await updateThumbnailImage(id, newImageUrl);
+      await updateThumbnailImage(id, newImageUrl, category);
     }
   };
 

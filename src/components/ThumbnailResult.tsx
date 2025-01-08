@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Wand2 } from 'lucide-react';
+import { Wand2, Edit3 } from 'lucide-react';
 import type { ThumbnailResponse } from '../types';
 import { FaceSwapModal } from './FaceSwapModal';
+import { InpaintingModal } from './InpaintingModal';
 
 interface ThumbnailResultProps {
   result: ThumbnailResponse;
@@ -9,6 +10,7 @@ interface ThumbnailResultProps {
 
 export function ThumbnailResult({ result }: ThumbnailResultProps) {
   const [showFaceSwap, setShowFaceSwap] = useState(false);
+  const [showInpainting, setShowInpainting] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState(result.imageUrl);
 
   if (result.status === 'error') {
@@ -18,6 +20,10 @@ export function ThumbnailResult({ result }: ThumbnailResultProps) {
   }
 
   const handleFaceSwapSuccess = (newImageUrl: string) => {
+    setCurrentImageUrl(newImageUrl);
+  };
+
+  const handleInpaintingSuccess = (newImageUrl: string) => {
     setCurrentImageUrl(newImageUrl);
   };
 
@@ -31,13 +37,21 @@ export function ThumbnailResult({ result }: ThumbnailResultProps) {
         />
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center gap-3">
         <button
           onClick={() => setShowFaceSwap(true)}
           className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors"
         >
           <Wand2 className="w-4 h-4" />
           Swap Face
+        </button>
+
+        <button
+          onClick={() => setShowInpainting(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors"
+        >
+          <Edit3 className="w-4 h-4" />
+          Add/Remove Object
         </button>
       </div>
 
@@ -46,6 +60,13 @@ export function ThumbnailResult({ result }: ThumbnailResultProps) {
         onClose={() => setShowFaceSwap(false)}
         thumbnailUrl={currentImageUrl}
         onSuccess={handleFaceSwapSuccess}
+      />
+
+      <InpaintingModal
+        isOpen={showInpainting}
+        onClose={() => setShowInpainting(false)}
+        imageUrl={currentImageUrl}
+        onSuccess={handleInpaintingSuccess}
       />
     </div>
   );
