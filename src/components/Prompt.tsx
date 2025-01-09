@@ -41,15 +41,30 @@ export function Prompt({ type, value, onChange, onSubmit, onFaceSwapSuccess, dis
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-4">
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          disabled={disabled || insufficientCredits}
-          placeholder={getPlaceholder()}
-          className="w-full h-32 px-4 py-3 bg-black/20 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
-        />
+        {type === 'youtube' ? (
+          <input
+            type="url"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={disabled || insufficientCredits}
+            placeholder={getPlaceholder()}
+            className="w-full px-4 py-3 bg-black/20 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          />
+        ) : (
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={disabled || insufficientCredits}
+            placeholder={getPlaceholder()}
+            className="w-full h-32 px-4 py-3 bg-black/20 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+          />
+        )}
         
         <div className="flex justify-between items-center">
+          <div className="text-zinc-500 text-sm">
+            (2 Credits per generation)
+          </div>
+          
           {insufficientCredits ? (
             <div className="text-red-400">
               Insufficient credits. Please upgrade to continue generating thumbnails.
@@ -64,10 +79,6 @@ export function Prompt({ type, value, onChange, onSubmit, onFaceSwapSuccess, dis
               Generate
             </button>
           )}
-          
-          <div className="text-zinc-500 text-sm">
-            (2 Credits per generation)
-          </div>
         </div>
       </div>
     </form>

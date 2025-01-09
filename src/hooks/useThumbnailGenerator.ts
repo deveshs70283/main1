@@ -6,7 +6,7 @@ import { deductCredits } from '../services/creditService';
 
 export function useThumbnailGenerator() {
   const { user } = useAuthState();
-  const [activeTab, setActiveTab] = useState<GenerationType>('thumbnail');
+  const [activeTab, setActiveTab] = useState<GenerationType>('youtube');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ThumbnailResponse | null>(null);

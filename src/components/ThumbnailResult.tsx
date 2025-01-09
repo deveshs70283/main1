@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Wand2, Edit3 } from 'lucide-react';
+import { Wand2, Download } from 'lucide-react';
 import type { ThumbnailResponse } from '../types';
 import { FaceSwapModal } from './FaceSwapModal';
-import { InpaintingModal } from './InpaintingModal';
 
 interface ThumbnailResultProps {
   result: ThumbnailResponse;
@@ -10,8 +9,8 @@ interface ThumbnailResultProps {
 
 export function ThumbnailResult({ result }: ThumbnailResultProps) {
   const [showFaceSwap, setShowFaceSwap] = useState(false);
-  const [showInpainting, setShowInpainting] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState(result.imageUrl);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   if (result.status === 'error') {
     return (
@@ -23,8 +22,42 @@ export function ThumbnailResult({ result }: ThumbnailResultProps) {
     setCurrentImageUrl(newImageUrl);
   };
 
-  const handleInpaintingSuccess = (newImageUrl: string) => {
-    setCurrentImageUrl(newImageUrl);
+  const handleDownload = async () => {
+    try {
+      setDownloadError(null);
+
+      if (!currentImageUrl) {
+        throw new Error('No image URL available');
+      }
+
+      const response = await fetch(currentImageUrl);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.statusText}`);
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.startsWith('image/')) {
+        throw new Error('Invalid image format');
+      }
+
+      const blob = await response.blob();
+      if (blob.size === 0) {
+        throw new Error('Empty image file');
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `thumbnail-${Date.now()}.${contentType.split('/')[1] || 'png'}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading thumbnail:', error);
+      setDownloadError(error instanceof Error ? error.message : 'Failed to download image');
+    }
   };
 
   return (
@@ -37,6 +70,12 @@ export function ThumbnailResult({ result }: ThumbnailResultProps) {
         />
       </div>
 
+      {downloadError && (
+        <div className="text-red-400 text-sm bg-red-400/10 p-3 rounded-lg">
+          {downloadError}
+        </div>
+      )}
+
       <div className="flex justify-center gap-3">
         <button
           onClick={() => setShowFaceSwap(true)}
@@ -47,11 +86,11 @@ export function ThumbnailResult({ result }: ThumbnailResultProps) {
         </button>
 
         <button
-          onClick={() => setShowInpainting(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors"
+          onClick={handleDownload}
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
         >
-          <Edit3 className="w-4 h-4" />
-          Add/Remove Object
+          <Download className="w-4 h-4" />
+          Download
         </button>
       </div>
 
@@ -60,13 +99,6 @@ export function ThumbnailResult({ result }: ThumbnailResultProps) {
         onClose={() => setShowFaceSwap(false)}
         thumbnailUrl={currentImageUrl}
         onSuccess={handleFaceSwapSuccess}
-      />
-
-      <InpaintingModal
-        isOpen={showInpainting}
-        onClose={() => setShowInpainting(false)}
-        imageUrl={currentImageUrl}
-        onSuccess={handleInpaintingSuccess}
       />
     </div>
   );

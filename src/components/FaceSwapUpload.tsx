@@ -96,7 +96,7 @@ export function FaceSwapUpload({ onSuccess }: FaceSwapUploadProps) {
         </div>
 
         <div>
-          <h3 className="text-white font-medium mb-2">Add Target Image</h3>
+          <h3 className="text-white font-medium mb-2">Add Image for Swap</h3>
           <UploadBox type="target" file={targetImage} icon={ImageIcon} />
         </div>
       </div>
