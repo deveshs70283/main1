@@ -41,6 +41,9 @@ export function Prompt({ type, value, onChange, onSubmit, onFaceSwapSuccess, dis
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-4">
+        {type === 'youtube' && (
+          <p className="text-zinc-400 text-sm mb-2">Just enter any YouTube video URL and see the Magic Happens</p>
+        )}
         {type === 'youtube' ? (
           <input
             type="url"

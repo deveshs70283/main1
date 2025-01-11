@@ -1,29 +1,28 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { useNavigate } from 'react-router-dom';
 
 export function useAuthState() {
-  const [user, setUser] = useState<User | null>(() => {
-    // Check for user in localStorage on initial load
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  const [user, setUser] = useState<User | null>(() => auth.currentUser);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
       setLoading(false);
-      // Save or remove user data in localStorage
-      if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
-      } else {
-        localStorage.removeItem('user');
+      
+      if (!firebaseUser) {
+        const currentPath = window.location.pathname;
+        if (!currentPath.includes('/auth/')) {
+          navigate('/auth/signin', { replace: true });
+        }
       }
     });
 
-    return unsubscribe;
-  }, []);
+    return () => unsubscribe();
+  }, [navigate]);
 
   return { user, loading };
 }

@@ -1,10 +1,11 @@
 import React from 'react';
 import { Home, Image, UserRound, LogOut } from 'lucide-react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Logo } from './Logo';
 import { auth } from '../lib/firebase';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuthState } from '../hooks/useAuthState';
 import { useCredits } from '../hooks/useCredits';
+import { signOutUser } from '../services/authService';
 
 interface NavItemProps {
   icon: React.ReactNode;
@@ -51,8 +52,8 @@ export function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
-      navigate('/');
+      await signOutUser();
+      navigate('/auth/signin');
     } catch (error) {
       console.error('Error signing out:', error);
     }

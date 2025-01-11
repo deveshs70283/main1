@@ -1,36 +1,37 @@
-import { signInWithPopup, signInWithRedirect, signInWithEmailAndPassword, getRedirectResult } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, signInWithEmailAndPassword, getRedirectResult, signOut } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 import { initializeUserCredits } from './creditService';
 
-export async function signInWithGoogle() {
+export async function signInWithEmail(email: string, password: string) {
   try {
-    // First try popup
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      if (result.user.metadata.creationTime === result.user.metadata.lastSignInTime) {
-        await initializeUserCredits(result.user.uid);
-      }
-      return result.user;
-    } catch (error: any) {
-      // If popup blocked, fallback to redirect
-      if (error.code === 'auth/popup-blocked') {
-        await signInWithRedirect(auth, googleProvider);
-        return null; // Redirect will handle the rest
-      }
-      throw error;
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    
+    // Check if this is a new user
+    if (userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime) {
+      await initializeUserCredits(userCredential.user.uid);
     }
+    
+    return userCredential.user;
   } catch (error) {
-    console.error('Error with Google auth:', error);
+    console.error('Sign in error:', error);
     throw error;
   }
 }
 
-export async function signInWithEmail(email: string, password: string) {
+export async function signInWithGoogle() {
   try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
+    const result = await signInWithPopup(auth, googleProvider);
+    
+    if (result.user.metadata.creationTime === result.user.metadata.lastSignInTime) {
+      await initializeUserCredits(result.user.uid);
+    }
+    
     return result.user;
-  } catch (error) {
-    console.error('Error with email auth:', error);
+  } catch (error: any) {
+    if (error.code === 'auth/popup-blocked') {
+      await signInWithRedirect(auth, googleProvider);
+      return null;
+    }
     throw error;
   }
 }
@@ -47,6 +48,15 @@ export async function handleAuthRedirect() {
     return false;
   } catch (error) {
     console.error('Error handling redirect:', error);
+    throw error;
+  }
+}
+
+export async function signOutUser() {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error('Error signing out:', error);
     throw error;
   }
 }
