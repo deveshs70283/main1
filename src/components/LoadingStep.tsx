@@ -11,7 +11,7 @@ export function LoadingStep({ step }: LoadingStepProps) {
     <div className="flex items-center gap-2 h-8">
       <div className="w-5 h-5 flex items-center justify-center shrink-0">
         {step.status === 'completed' ? (
-          <Check className="w-4 h-4 text-emerald-500" />
+          <Check className="w-4 h-4 text-purple-500" />
         ) : step.status === 'loading' ? (
           <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
         ) : (
@@ -25,7 +25,7 @@ export function LoadingStep({ step }: LoadingStepProps) {
         {step.status === 'loading' && (
           <div className="mt-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-blue-500 transition-all duration-200 ease-out"
+              className="h-full bg-purple-500 transition-all duration-200 ease-out"
               style={{ width: `${step.progress}%` }}
             />
           </div>

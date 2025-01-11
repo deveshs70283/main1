@@ -62,7 +62,7 @@ export function FaceSwapUpload({ onSuccess }: FaceSwapUploadProps) {
       />
       <label
         htmlFor={`${type}-upload`}
-        className="block w-full h-48 bg-zinc-800/50 rounded-lg border-2 border-dashed border-zinc-700 hover:border-emerald-500 transition-colors"
+        className="block w-full h-48 bg-black/20 rounded-lg border-2 border-dashed border-purple-500/30 hover:border-purple-500/50 transition-colors"
       >
         {file ? (
           <img
@@ -104,7 +104,7 @@ export function FaceSwapUpload({ onSuccess }: FaceSwapUploadProps) {
       <button
         onClick={handleSwap}
         disabled={!faceImage || !targetImage || loading}
-        className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600 transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-3 bg-purple-500 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-purple-600 transition-colors"
       >
         {loading ? (
           <>

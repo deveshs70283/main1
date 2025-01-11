@@ -1,6 +1,20 @@
 import { signInWithPopup, signInWithRedirect, signInWithEmailAndPassword, getRedirectResult, signOut } from 'firebase/auth';
-import { auth, googleProvider } from '../lib/firebase';
+import { auth, googleProvider, db } from '../lib/firebase';
 import { initializeUserCredits } from './creditService';
+import { getRandomAvatar } from '../utils/avatars';
+import { updateProfile } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+
+async function getOrCreateUserAvatar(uid: string): Promise<string> {
+  const userDoc = await getDoc(doc(db, 'users', uid));
+  if (userDoc.exists() && userDoc.data().avatarUrl) {
+    return userDoc.data().avatarUrl;
+  }
+  
+  const avatarUrl = getRandomAvatar();
+  await setDoc(doc(db, 'users', uid), { avatarUrl }, { merge: true });
+  return avatarUrl;
+}
 
 export async function signInWithEmail(email: string, password: string) {
   try {
@@ -9,6 +23,12 @@ export async function signInWithEmail(email: string, password: string) {
     // Check if this is a new user
     if (userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime) {
       await initializeUserCredits(userCredential.user.uid);
+      const avatarUrl = await getOrCreateUserAvatar(userCredential.user.uid);
+      await updateProfile(userCredential.user, { photoURL: avatarUrl });
+    } else if (!userCredential.user.photoURL) {
+      // Existing user but missing avatar
+      const avatarUrl = await getOrCreateUserAvatar(userCredential.user.uid);
+      await updateProfile(userCredential.user, { photoURL: avatarUrl });
     }
     
     return userCredential.user;
@@ -24,6 +44,11 @@ export async function signInWithGoogle() {
     
     if (result.user.metadata.creationTime === result.user.metadata.lastSignInTime) {
       await initializeUserCredits(result.user.uid);
+      // Only set avatar if user doesn't already have one from Google
+      if (!result.user.photoURL?.includes('googleusercontent.com')) {
+        const avatarUrl = await getOrCreateUserAvatar(result.user.uid);
+        await updateProfile(result.user, { photoURL: avatarUrl });
+      }
     }
     
     return result.user;
@@ -42,6 +67,11 @@ export async function handleAuthRedirect() {
     if (result?.user) {
       if (result.user.metadata.creationTime === result.user.metadata.lastSignInTime) {
         await initializeUserCredits(result.user.uid);
+        // Only set avatar if user doesn't already have one from Google
+        if (!result.user.photoURL?.includes('googleusercontent.com')) {
+          const avatarUrl = await getOrCreateUserAvatar(result.user.uid);
+          await updateProfile(result.user, { photoURL: avatarUrl });
+        }
       }
       return true;
     }

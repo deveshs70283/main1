@@ -51,7 +51,7 @@ export function Prompt({ type, value, onChange, onSubmit, onFaceSwapSuccess, dis
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled || insufficientCredits}
             placeholder={getPlaceholder()}
-            className="w-full px-4 py-3 bg-black/20 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-black/20 border border-purple-500/20 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
         ) : (
           <textarea
@@ -59,7 +59,7 @@ export function Prompt({ type, value, onChange, onSubmit, onFaceSwapSuccess, dis
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled || insufficientCredits}
             placeholder={getPlaceholder()}
-            className="w-full h-32 px-4 py-3 bg-black/20 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+            className="w-full h-32 px-4 py-3 bg-black/20 border border-purple-500/20 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
           />
         )}
         
@@ -76,7 +76,7 @@ export function Prompt({ type, value, onChange, onSubmit, onFaceSwapSuccess, dis
             <button
               type="submit"
               disabled={disabled || !value.trim()}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-600 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-purple-600 transition-colors"
             >
               <Sparkles className="w-4 h-4" />
               Generate

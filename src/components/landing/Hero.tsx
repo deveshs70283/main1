@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check, X } from 'lucide-react';
+import "../../css/pricing.css";
 
 export function Hero() {
   return (
@@ -36,7 +37,7 @@ export function Hero() {
         </div>
 
         {/* Main content */}
-        <div className="text-center max-w-4xl mx-auto">
+        <div className="text-center max-w-4xl mx-auto" style={{ maxWidth: "70rem" }}>
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">
             Quick Thumbnail Viral Results
           </h1>
@@ -54,7 +55,7 @@ export function Hero() {
           </div>
 
           {/* Enhanced image showcase with bigger glow */}
-          <div className="relative max-w-5xl mx-auto">
+          <div className="relative max-w-5xl mx-auto mb-32">
             {/* Large top glow */}
             <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[140%] h-[500px] bg-gradient-to-b from-purple-600/30 via-pink-500/20 to-transparent blur-[100px]" />
             
@@ -70,8 +71,104 @@ export function Hero() {
               </div>
             </div>
           </div>
+
+          {/* Pricing Section */}
+          <div className="pricing-section">
+            <div className="pricing-grid">
+              {/* Essential Plan */}
+              <div className="pricing-card">
+                <h3 className="pricing-title">Essential</h3>
+                <div className="pricing-price">
+                  <span className="pricing-currency">₹</span>
+                  <span className="pricing-amount">699</span>
+                  <span className="pricing-period">/mo</span>
+                </div>
+                <p className="pricing-description">
+                  Generate up to <span className="pricing-highlight">30 thumbnails</span> per month.
+                </p>
+                <div className="pricing-features">
+                  <Feature available>300 credits</Feature>
+                  <Feature available>Thumbnail Generator</Feature>
+                  <Feature >FaceSwap</Feature>
+                  <Feature >Thumbnail Upscaler</Feature>
+                  <Feature >Title Generator</Feature>
+                  <Feature >All Generations Remain Private</Feature>
+                  <Feature >Early Access to New Features</Feature>
+                </div>
+                <button className="pricing-button pricing-button-default">
+                  Subscribe
+                </button>
+              </div>
+
+              {/* Premium Plan */}
+              <div className="pricing-card popular">
+                <div className="popular-badge">
+                  MOST POPULAR
+                </div>
+                <h3 className="pricing-title">Premium</h3>
+                <div className="pricing-price">
+                  <span className="pricing-currency">₹</span>
+                  <span className="pricing-amount">1499</span>
+                  <span className="pricing-period">/mo</span>
+                </div>
+                <p className="pricing-description">
+                  Generate up to <span className="pricing-highlight">70 thumbnails</span> per month.
+                </p>
+                <div className="pricing-features">
+                   <Feature available>700 credits</Feature>
+                  <Feature available>Thumbnail Generator</Feature>
+                  <Feature available>FaceSwap</Feature>
+                  <Feature>Thumbnail Upscaler</Feature>
+                  <Feature>Title Generator</Feature>
+                  <Feature>All Generations Remain Private</Feature>
+                  <Feature>Early Access to New Features</Feature>
+                </div>
+                <button className="pricing-button pricing-button-popular">
+                  Subscribe
+                </button>
+              </div>
+
+              {/* Ultimate Plan */}
+              <div className="pricing-card">
+                <h3 className="pricing-title">Ultimate</h3>
+                <div className="pricing-price">
+                  <span className="pricing-currency">₹</span>
+                  <span className="pricing-amount">1999</span>
+                  <span className="pricing-period">/mo</span>
+                </div>
+                <p className="pricing-description">
+                  Generate up to <span className="pricing-highlight">150 thumbnails</span> per month.
+                </p>
+                <div className="pricing-features">
+                  <Feature available>1500 credits</Feature>
+                  <Feature available>Thumbnail Generator</Feature>
+                  <Feature available>FaceSwap</Feature>
+                  <Feature available>Thumbnail Upscaler</Feature>
+                  <Feature available>Title Generator</Feature>
+                  <Feature available>All Generations Remain Private</Feature>
+                  <Feature available>Early Access to New Features</Feature>
+                </div>
+                <button className="pricing-button pricing-button-default">
+                  Subscribe
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Feature({ children, available = false }: { children: React.ReactNode; available?: boolean }) {
+  return (
+    <div className="feature-item">
+      {available ? (
+        <Check className="feature-check" />
+      ) : (
+        <X className="feature-x" />
+      )}
+      <span className="feature-text">{children}</span>
     </div>
   );
 }

@@ -25,7 +25,7 @@ function NavItem({ icon, label, active, onClick, to }: NavItemProps) {
 
   const className = `w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
     active 
-      ? 'bg-emerald-500/10 text-emerald-500' 
+      ? 'bg-purple-500/10 text-purple-400' 
       : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
   }`;
 

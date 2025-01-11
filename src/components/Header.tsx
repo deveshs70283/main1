@@ -28,7 +28,7 @@ export function Header() {
             </button>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-sm hover:bg-emerald-600 transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500 text-white text-sm hover:bg-purple-600 transition-colors"
             >
               <Plus className="w-4 h-4" />
               <span>Upgrade</span>

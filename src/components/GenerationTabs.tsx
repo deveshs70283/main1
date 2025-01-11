@@ -23,10 +23,10 @@ export function GenerationTabs({ activeTab, onTabChange }: GenerationTabsProps) 
           disabled={disabled}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             activeTab === id
-              ? 'bg-emerald-500 text-white'
+              ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
               : disabled
               ? 'text-zinc-600 cursor-not-allowed'
-              : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+              : 'text-zinc-400 hover:text-white hover:bg-purple-500/10'
           }`}
         >
           <Icon className="w-4 h-4" />

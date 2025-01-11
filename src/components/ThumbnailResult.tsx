@@ -25,38 +25,19 @@ export function ThumbnailResult({ result }: ThumbnailResultProps) {
   const handleDownload = async () => {
     try {
       setDownloadError(null);
-
-      if (!currentImageUrl) {
-        throw new Error('No image URL available');
-      }
-
       const response = await fetch(currentImageUrl);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch image: ${response.statusText}`);
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (!contentType?.startsWith('image/')) {
-        throw new Error('Invalid image format');
-      }
-
       const blob = await response.blob();
-      if (blob.size === 0) {
-        throw new Error('Empty image file');
-      }
-
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `thumbnail-${Date.now()}.${contentType.split('/')[1] || 'png'}`;
+      a.download = `thumbnail-${Date.now()}.jpg`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
       console.error('Error downloading thumbnail:', error);
-      setDownloadError(error instanceof Error ? error.message : 'Failed to download image');
+      setDownloadError('Failed to download image');
     }
   };
 
@@ -87,7 +68,7 @@ export function ThumbnailResult({ result }: ThumbnailResultProps) {
 
         <button
           onClick={handleDownload}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
         >
           <Download className="w-4 h-4" />
           Download

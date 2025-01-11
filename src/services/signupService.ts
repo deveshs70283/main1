@@ -1,7 +1,8 @@
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
-import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
 import { initializeUserCredits } from './creditService';
+import { getRandomAvatar } from '../utils/avatars';
 
 export interface SignupData {
   email: string;
@@ -9,7 +10,16 @@ export interface SignupData {
   displayName: string;
 }
 
+// IP that's allowed to create multiple accounts
+const WHITELISTED_IP = '49.36.237.230';
+
 async function checkExistingIP(ip: string): Promise<boolean> {
+  // If IP is whitelisted, always allow signup
+  if (ip === WHITELISTED_IP) {
+    return false;
+  }
+
+  // For all other IPs, check if they already have an account
   const usersRef = collection(db, 'users');
   const q = query(usersRef, where('ipAddress', '==', ip));
   const snapshot = await getDocs(q);
@@ -22,7 +32,7 @@ export async function signupWithEmail({ email, password, displayName }: SignupDa
     const ipResponse = await fetch('https://api.ipify.org?format=json');
     const { ip } = await ipResponse.json();
 
-    // Check if IP already exists
+    // Check if IP is allowed to create an account
     const ipExists = await checkExistingIP(ip);
     if (ipExists) {
       throw new Error('Multiple sign-ups are not allowed from the same IP address!');
@@ -31,16 +41,20 @@ export async function signupWithEmail({ email, password, displayName }: SignupDa
     // Create user account
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     
-    // Update profile with display name
+    // Get random avatar
+    const avatarUrl = getRandomAvatar();
+    
+    // Update profile with display name and avatar
     await updateProfile(userCredential.user, {
-      displayName
+      displayName,
+      photoURL: avatarUrl
     });
     
-    // Store user data with IP address
-    await addDoc(collection(db, 'users'), {
-      uid: userCredential.user.uid,
+    // Store user data with IP address and avatar
+    await setDoc(doc(db, 'users', userCredential.user.uid), {
       email,
       displayName,
+      avatarUrl,
       ipAddress: ip,
       createdAt: new Date().toISOString()
     });
